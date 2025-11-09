@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import "../styles/LoginPage.css";
 
 export default function LoginPage() {
   const API_URL = "https://affirmation-backend-91g3.onrender.com";
@@ -36,31 +37,53 @@ export default function LoginPage() {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
+    <div className="login-container">
+      <div className="login-card">
+        <h1>Welcome Back</h1>
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+              className="form-input"
+            />
+          </div>
 
-      <div>
-        <label htmlFor="email">Email:</label>
-        <input
-          type="text"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br />
-        <br />
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+              className="form-input"
+            />
+          </div>
 
-        <label htmlFor="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {error && <p>No account found.</p>}
-        <br />
-        <button onClick={handleSubmit}>Login</button>
-        <Link to="/sign-up">Sign Up</Link>
+          {error && (
+            <div className="error-message">
+              <p>Invalid email or password. Please try again.</p>
+            </div>
+          )}
+
+          <button type="submit" className="login-button">
+            Login
+          </button>
+
+          <div className="signup-prompt">
+            <p>Don't have an account?</p>
+            <Link to="/sign-up" className="signup-link">
+              Create Account
+            </Link>
+          </div>
+        </form>
       </div>
     </div>
   );

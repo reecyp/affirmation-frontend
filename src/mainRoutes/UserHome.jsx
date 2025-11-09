@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { IoTrash } from "react-icons/io5";
 import { getDailyAffirmations } from "../helperFunctions/getDailyAffirmations";
+import "../styles/UserHome.css";
 
 export default function UserHome() {
   const API_URL = "https://affirmation-backend-91g3.onrender.com";
@@ -71,8 +72,6 @@ export default function UserHome() {
         setAffirmationList(data.data.affList.rows);
         const selectedAffs = getDailyAffirmations(data.data.affList.rows);
         setSelectedAffirmations(selectedAffs);
-
-        console.log(data.data.affList.rows);
       } catch (error) {
         console.error("Error fetching affirmations:", error);
       } finally {
@@ -150,61 +149,73 @@ export default function UserHome() {
   }
 
   return (
-    <div>
-      <div>
-        <h1>Hello {user.name}!</h1>
-        {affirmationList.length >= 3 ? (
-          <>
-            <button onClick={() => onButtonPress(1)}>
-              {selectedAffirmations[0]?.affirmation}
-            </button>
-            <button onClick={() => onButtonPress(2)}>
-              {selectedAffirmations[1]?.affirmation}
-            </button>
-            <button onClick={() => onButtonPress(3)}>
-              {selectedAffirmations[2]?.affirmation}
-            </button>
-            {!loading && <p>Affirmation 1: {affirmationCount[1]}</p>}
-            {!loading && <p>Affirmation 2: {affirmationCount[2]}</p>}
-            {!loading && <p>Affirmation 3: {affirmationCount[3]}</p>}
-            {loading && <p>Loading...</p>}{" "}
-          </>
-        ) : (
-          <div>
-            <p>You need at least 3 affirmations to start tracking.</p>
-            <p>Current affirmations: {affirmationList.length}/3</p>
-          </div>
-        )}
-        <form>
-          <label htmlFor="name">New Affirmation:</label>
-          <input
-            id="name"
-            type="text"
-            value={affFormData}
-            onChange={(e) => setAffFormData(e.target.value)}
-          />
-          <button onClick={newAffirmationFormSumbit}>Submit Affirmation</button>
-          {affirmationList.length >= 3 && (
-            <p>
-              Note: deleting or creating affimrations will refresh the 3
-              affimations and your progress
-            </p>
-          )}
-        </form>
-        <div>
-          {!loading &&
-            affirmationList.map((data, index) => (
-              <div key={index}>
-                <p>
-                  {index + 1}. {data.affirmation}
-                </p>
-                <IoTrash
-                  onClick={() => deleteAffirmation(index, data.id)}
-                  color="red"
-                />
-              </div>
-            ))}
+    <div className="user-home">
+      <h1>Hello {user.name}!</h1>
+      
+      {loading ? (
+        <div className="loading">Loading your affirmations...</div>
+      ) : affirmationList.length >= 3 ? (
+        <div className="affirmations-grid">
+          {[1, 2, 3].map((num) => {
+            const opacity = Math.min(affirmationCount[num] * 0.04, 1);
+            return (
+              <button
+                key={num}
+                onClick={() => onButtonPress(num)}
+                className="affirmation-button"
+                style={{
+                  opacity: 0.2 + opacity * 0.8,
+                  backgroundColor: '#3b82f6'
+                }}
+                disabled={affirmationCount[num] >= 25}
+              >
+                <span className="count-badge">{affirmationCount[num]}/25</span>
+                {selectedAffirmations[num - 1]?.affirmation}
+              </button>
+            );
+          })}
         </div>
+      ) : (
+        <div className="welcome-message">
+          <p>You need at least 3 affirmations to start tracking.</p>
+          <p>Current affirmations: {affirmationList.length}/3</p>
+        </div>
+      )}
+
+      <form className="affirmation-form" onSubmit={newAffirmationFormSumbit}>
+        <input
+          id="name"
+          type="text"
+          value={affFormData}
+          onChange={(e) => setAffFormData(e.target.value)}
+          placeholder="Enter your new affirmation"
+          className="affirmation-input"
+        />
+        <button type="submit" className="submit-button">
+          Add Affirmation
+        </button>
+        {affirmationList.length >= 3 && (
+          <p className="note">
+            Note: Adding or deleting affirmations will refresh your daily selection
+          </p>
+        )}
+      </form>
+      
+      {/* iOS-style list of all affirmations */}
+      <div className="affirmations-list">
+        {!loading &&
+          affirmationList.map((data, index) => (
+            <div key={data.id} className="affirmation-item">
+              <span>{data.affirmation}</span>
+              <button
+                className="delete-button"
+                onClick={() => deleteAffirmation(index, data.id)}
+                aria-label="Delete affirmation"
+              >
+                <IoTrash />
+              </button>
+            </div>
+          ))}
       </div>
     </div>
   );
