@@ -47,7 +47,7 @@ export default function UserHome() {
     setAffirmationList(newList);
     setSelectedAffirmations(selectedAffs);
     setAffFormData("");
-    await countResetHelper();
+    // await countResetHelper();
   }
 
   useEffect(() => {
@@ -130,24 +130,24 @@ export default function UserHome() {
       }
     );
 
-    await countResetHelper();
+    // await countResetHelper();
   }
 
-  async function countResetHelper() {
-    const resetCountResponse = await fetch(
-      `${API_URL}/api/user/${userId}/affirmation/reset`,
-      {
-        method: "PATCH",
-      }
-    );
+  // async function countResetHelper() {
+  //   const resetCountResponse = await fetch(
+  //     `${API_URL}/api/user/${userId}/affirmation/reset`,
+  //     {
+  //       method: "PATCH",
+  //     }
+  //   );
 
-    setAffirmationCount({
-      1: 0,
-      2: 0,
-      3: 0,
-    });
-  }
-
+  //   setAffirmationCount({
+  //     1: 0,
+  //     2: 0,
+  //     3: 0,
+  //   });
+  //   console.log("count reset")
+  // }
   return (
     <div className="user-home">
       <h1>Hello {user.name}!</h1>
