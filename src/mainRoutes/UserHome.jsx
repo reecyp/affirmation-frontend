@@ -16,7 +16,10 @@ export default function UserHome() {
   const [loading, setLoading] = useState(true);
   const [affFormData, setAffFormData] = useState("");
   const [actions, setActions] = useState({ 1: "", 2: "", 3: "" });
-  const [actionFormData, setActionFormData] = useState({ affirmationNumber: "1", action: "" });
+  const [actionFormData, setActionFormData] = useState({
+    affirmationNumber: "1",
+    action: "",
+  });
   let user = null;
 
   try {
@@ -81,8 +84,33 @@ export default function UserHome() {
       }
     }
 
+    async function fetchActions() {
+      try {
+        const response = await fetch(`${API_URL}/api/user/${userId}/actions`);
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch actions");
+        }
+
+        const result = await response.json();
+        const actionsData = result.data;
+
+        // Build actions object from the response array
+        const actionsObj = { 1: "", 2: "", 3: "" };
+        actionsData.forEach((action) => {
+          actionsObj[action.affirmation_number] = action.action_text || "";
+        });
+
+        setActions(actionsObj);
+      } catch (error) {
+        console.error("Error fetching actions:", error);
+      }
+    }
+
     if (userId) {
+      fetchActions();
       fetchAffirmations();
+
     }
   }, [userId]);
 
@@ -125,12 +153,9 @@ export default function UserHome() {
     const selectedAffs = getDailyAffirmations(newList);
     setSelectedAffirmations(selectedAffs);
 
-    const response = await fetch(
-      `${API_URL}/api/affirmation/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
+    const response = await fetch(`${API_URL}/api/affirmation/${id}`, {
+      method: "DELETE",
+    });
 
     await countResetHelper();
   }
@@ -148,12 +173,12 @@ export default function UserHome() {
       2: 0,
       3: 0,
     });
-    console.log("count reset")
+    console.log("count reset");
   }
 
   async function handleActionSubmit(e) {
     e.preventDefault();
-    
+
     if (!actionFormData.action.trim()) {
       alert("Please enter an action");
       return;
@@ -166,7 +191,7 @@ export default function UserHome() {
     }));
 
     const response = await fetch(
-      `${API_URL}/user/${userId}/affirmation/${affirmationNumber}/action`,
+      `${API_URL}/api/user/${userId}/affirmation/${affirmationNumber}/action`,
       {
         method: "PATCH",
         headers: {
@@ -176,13 +201,17 @@ export default function UserHome() {
       }
     );
 
+    if (!response.ok) {
+      throw new Error("Failed to update action");
+    }
+
     setActionFormData({ affirmationNumber: "1", action: "" });
   }
   return (
     <div className="user-home">
       <h1>Hello {user.name}!</h1>
-      
-{loading ? (
+
+      {loading ? (
         <div className="loading">Loading your affirmations...</div>
       ) : affirmationList.length >= 3 ? (
         <>
@@ -196,11 +225,13 @@ export default function UserHome() {
                   className="affirmation-button"
                   style={{
                     opacity: 0.2 + opacity * 0.8,
-                    backgroundColor: '#3b82f6'
+                    backgroundColor: "#3b82f6",
                   }}
                   disabled={affirmationCount[num] >= 25}
                 >
-                  <span className="count-badge">{affirmationCount[num]}/25</span>
+                  <span className="count-badge">
+                    {affirmationCount[num]}/25
+                  </span>
                   {selectedAffirmations[num - 1]?.affirmation}
                 </button>
               );
@@ -215,7 +246,9 @@ export default function UserHome() {
                 <div key={num} className="action-item">
                   <span className="action-number">•</span>
                   <div className="action-content">
-                    <strong>{selectedAffirmations[num - 1]?.affirmation} :</strong>
+                    <strong>
+                      {selectedAffirmations[num - 1]?.affirmation} :
+                    </strong>
                     <span className="action-text">
                       {actions[num] || "No action added yet"}
                     </span>
@@ -229,7 +262,10 @@ export default function UserHome() {
               <select
                 value={actionFormData.affirmationNumber}
                 onChange={(e) =>
-                  setActionFormData((prev) => ({ ...prev, affirmationNumber: e.target.value }))
+                  setActionFormData((prev) => ({
+                    ...prev,
+                    affirmationNumber: e.target.value,
+                  }))
                 }
                 className="action-select"
               >
@@ -243,7 +279,10 @@ export default function UserHome() {
                 type="text"
                 value={actionFormData.action}
                 onChange={(e) =>
-                  setActionFormData((prev) => ({ ...prev, action: e.target.value }))
+                  setActionFormData((prev) => ({
+                    ...prev,
+                    action: e.target.value,
+                  }))
                 }
                 placeholder="What action did you take?"
                 className="action-input"
@@ -275,11 +314,12 @@ export default function UserHome() {
         </button>
         {affirmationList.length >= 3 && (
           <p className="note">
-            Note: Adding or deleting affirmations will refresh your daily selection
+            Note: Adding or deleting affirmations will refresh your daily
+            selection
           </p>
         )}
       </form>
-      
+
       {/* iOS-style list of all affirmations */}
       <div className="affirmations-list">
         {!loading &&
