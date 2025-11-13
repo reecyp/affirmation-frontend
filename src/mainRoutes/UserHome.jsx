@@ -15,6 +15,8 @@ export default function UserHome() {
   const [selectedAffirmations, setSelectedAffirmations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [affFormData, setAffFormData] = useState("");
+  const [actions, setActions] = useState({ 1: "", 2: "", 3: "" });
+  const [actionFormData, setActionFormData] = useState({ affirmationNumber: "1", action: "" });
   let user = null;
 
   try {
@@ -148,33 +150,110 @@ export default function UserHome() {
     });
     console.log("count reset")
   }
+
+  async function handleActionSubmit(e) {
+    e.preventDefault();
+    
+    if (!actionFormData.action.trim()) {
+      alert("Please enter an action");
+      return;
+    }
+    const { affirmationNumber, action } = actionFormData;
+
+    setActions((prev) => ({
+      ...prev,
+      [affirmationNumber]: action,
+    }));
+
+    const response = await fetch(
+      `${API_URL}/user/${userId}/affirmation/${affirmationNumber}/action`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action }),
+      }
+    );
+
+    setActionFormData({ affirmationNumber: "1", action: "" });
+  }
   return (
     <div className="user-home">
       <h1>Hello {user.name}!</h1>
       
-      {loading ? (
+{loading ? (
         <div className="loading">Loading your affirmations...</div>
       ) : affirmationList.length >= 3 ? (
-        <div className="affirmations-grid">
-          {[1, 2, 3].map((num) => {
-            const opacity = Math.min(affirmationCount[num] * 0.04, 1);
-            return (
-              <button
-                key={num}
-                onClick={() => onButtonPress(num)}
-                className="affirmation-button"
-                style={{
-                  opacity: 0.2 + opacity * 0.8,
-                  backgroundColor: '#3b82f6'
-                }}
-                disabled={affirmationCount[num] >= 25}
+        <>
+          <div className="affirmations-grid">
+            {[1, 2, 3].map((num) => {
+              const opacity = Math.min(affirmationCount[num] * 0.04, 1);
+              return (
+                <button
+                  key={num}
+                  onClick={() => onButtonPress(num)}
+                  className="affirmation-button"
+                  style={{
+                    opacity: 0.2 + opacity * 0.8,
+                    backgroundColor: '#3b82f6'
+                  }}
+                  disabled={affirmationCount[num] >= 25}
+                >
+                  <span className="count-badge">{affirmationCount[num]}/25</span>
+                  {selectedAffirmations[num - 1]?.affirmation}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Actions Section */}
+          <div className="actions-section">
+            <h2>Today's Actions</h2>
+            <div className="actions-list">
+              {[1, 2, 3].map((num) => (
+                <div key={num} className="action-item">
+                  <span className="action-number">•</span>
+                  <div className="action-content">
+                    <strong>{selectedAffirmations[num - 1]?.affirmation} :</strong>
+                    <span className="action-text">
+                      {actions[num] || "No action added yet"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Action Form */}
+            <form className="action-form" onSubmit={handleActionSubmit}>
+              <select
+                value={actionFormData.affirmationNumber}
+                onChange={(e) =>
+                  setActionFormData((prev) => ({ ...prev, affirmationNumber: e.target.value }))
+                }
+                className="action-select"
               >
-                <span className="count-badge">{affirmationCount[num]}/25</span>
-                {selectedAffirmations[num - 1]?.affirmation}
+                {[1, 2, 3].map((num) => (
+                  <option key={num} value={num}>
+                    Affirmation {num}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={actionFormData.action}
+                onChange={(e) =>
+                  setActionFormData((prev) => ({ ...prev, action: e.target.value }))
+                }
+                placeholder="What action did you take?"
+                className="action-input"
+              />
+              <button type="submit" className="action-submit-button">
+                Add Action
               </button>
-            );
-          })}
-        </div>
+            </form>
+          </div>
+        </>
       ) : (
         <div className="welcome-message">
           <p>You need at least 3 affirmations to start tracking.</p>
