@@ -52,7 +52,7 @@ export default function UserHome() {
     setAffirmationList(newList);
     setSelectedAffirmations(selectedAffs);
     setAffFormData("");
-    await countResetHelper();
+    await resetCountAndActions();
   }
 
   useEffect(() => {
@@ -157,10 +157,10 @@ export default function UserHome() {
       method: "DELETE",
     });
 
-    await countResetHelper();
+    await resetCountAndActions();
   }
 
-  async function countResetHelper() {
+  async function resetCountAndActions() {
     const resetCountResponse = await fetch(
       `${API_URL}/api/user/${userId}/affirmation/reset`,
       {
@@ -173,7 +173,14 @@ export default function UserHome() {
       2: 0,
       3: 0,
     });
-    console.log("count reset");
+    
+    setActions({
+      1: "",
+      2: "",
+      3: "",
+    });
+    
+    console.log("count and actions reset");
   }
 
   async function handleActionSubmit(e) {
