@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { IoTrash } from "react-icons/io5";
 import { getDailyAffirmations } from "../helperFunctions/getDailyAffirmations";
+import sampleAffirmations from "../data/sampleAffirmations";
 import "../styles/UserHome.css";
 
 export default function UserHome() {
@@ -20,6 +21,7 @@ export default function UserHome() {
     affirmationNumber: "1",
     action: "",
   });
+  const [showSampleAffirmations, setShowSampleAffirmations] = useState(false);
   let user = null;
 
   try {
@@ -342,6 +344,27 @@ export default function UserHome() {
               </button>
             </div>
           ))}
+      </div>
+
+      {/* Sample Affirmations Section */}
+      <div className="sample-affirmations-section">
+        <button
+          className="toggle-samples-button"
+          onClick={() => setShowSampleAffirmations(!showSampleAffirmations)}
+        >
+          {showSampleAffirmations ? "Hide Sample Affirmations" : "Show Sample Affirmations"}
+        </button>
+
+        {showSampleAffirmations && (
+          <div className="sample-affirmations-list">
+            <h3>Powerful Affirmations</h3>
+            {sampleAffirmations.map((affirmation, index) => (
+              <div key={index} className="sample-affirmation-item">
+                <span>{affirmation}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
