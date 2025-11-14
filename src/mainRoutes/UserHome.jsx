@@ -116,7 +116,7 @@ export default function UserHome() {
 
   async function onButtonPress(num) {
     try {
-      if (affirmationCount[num] >= 25) return;
+      if (affirmationCount[num] >= 20) return;
 
       setAffirmationCount((prev) => ({
         ...prev,
@@ -224,7 +224,7 @@ export default function UserHome() {
         <>
           <div className="affirmations-grid">
             {[1, 2, 3].map((num) => {
-              const opacity = Math.min(affirmationCount[num] * 0.04, 1);
+              const opacity = Math.min(affirmationCount[num] * 0.05, 1);
               return (
                 <button
                   key={num}
@@ -234,10 +234,10 @@ export default function UserHome() {
                     opacity: 0.2 + opacity * 0.8,
                     backgroundColor: "#3b82f6",
                   }}
-                  disabled={affirmationCount[num] >= 25}
+                  disabled={affirmationCount[num] >= 20}
                 >
                   <span className="count-badge">
-                    {affirmationCount[num]}/25
+                    {affirmationCount[num]}/20
                   </span>
                   {selectedAffirmations[num - 1]?.affirmation}
                 </button>
